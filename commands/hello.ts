@@ -1,6 +1,9 @@
-import { Arguments } from "https://deno.land/x/yargs@v17.7.2-deno/deno-types.ts";
 import { MongoClient } from "npm:mongodb@6";
 import { invokeAtlasCli } from "../util/atlas.ts";
+
+interface HelloArguments {
+  deploymentName: string;
+}
 
 interface HelloResponse {
   ok: number;
@@ -12,7 +15,13 @@ interface HelloResult {
 }
 
 async function getConnectionString(deploymentName: string): Promise<string> {
-  const connectionString = await invokeAtlasCli(["deployments", "connect", deploymentName, "--connectWith", "connectionString"]);
+  const connectionString = await invokeAtlasCli([
+    "deployments",
+    "connect",
+    deploymentName,
+    "--connectWith",
+    "connectionString",
+  ]);
   return connectionString.trim();
 }
 
@@ -21,7 +30,9 @@ async function hello(connectionString: string): Promise<HelloResult> {
   const result: HelloResult = { ok: false };
   try {
     await client.connect();
-    const helloResponse: HelloResponse = await client.db("admin").command({ hello: 1 }) as HelloResponse;
+    const helloResponse: HelloResponse = await client.db("admin").command({
+      hello: 1,
+    }) as HelloResponse;
     result.ok = helloResponse.ok === 1;
     return result;
   } catch (error: any) {
@@ -35,29 +46,38 @@ async function hello(connectionString: string): Promise<HelloResult> {
   }
 }
 
-async function handler(argv: Arguments) {
+async function handler(argv: HelloArguments) {
   const deploymentName = argv.deploymentName;
   const connectionString = await getConnectionString(deploymentName);
-  console.log(`%cConnection string: %c${connectionString}`, "font-weight: bold", "font-weight: normal");
+  console.log(
+    `%cConnection string: %c${connectionString}`,
+    "font-weight: bold",
+    "font-weight: normal",
+  );
   const result: HelloResult = await hello(connectionString);
-  console.log(`%cCluster reachable: %c${result.ok}${result.errorCode ? " (" + result.errorCode + ")" : ""}`, "font-weight: bold", `font-weight: normal; color: ${result.ok ? "green" : "red"}`);
+  console.log(
+    `%cCluster reachable: %c${result.ok}${
+      result.errorCode ? " (" + result.errorCode + ")" : ""
+    }`,
+    "font-weight: bold",
+    `font-weight: normal; color: ${result.ok ? "green" : "red"}`,
+  );
 }
 
 function builder(yargs: any) {
-  return yargs.option('deploymentName', {
-    alias: 'd',
-    type: 'string',
-    description: 'The name of the deployment to connect to.',
-    demandOption: true
+  return yargs.option("deploymentName", {
+    alias: "d",
+    type: "string",
+    description: "The name of the deployment to connect to.",
+    demandOption: true,
   });
 }
 
 const command = {
-  command: 'hello',
-  describe: 'Check if the cluster is up and running and can be reached.',
+  command: "hello",
+  describe: "Check if the cluster is up and running and can be reached.",
   builder,
-  handler
+  handler,
 };
-
 
 export default command;

@@ -1,5 +1,4 @@
 export async function getAtlasCliExecutable(ppid: number): Promise<string> {
-
   //TODO: adjust things so that it returns the full path to the Atlas CLI executable. Right now it returns the name of the executable.
 
   const cmdAndArgs: string[] = (
