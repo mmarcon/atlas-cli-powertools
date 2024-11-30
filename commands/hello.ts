@@ -1,5 +1,5 @@
 import { MongoClient } from "npm:mongodb@6";
-import { invokeAtlasCli } from "../util/atlas.ts";
+import { AtlasCliInvocationResult, invokeAtlasCli } from "../util/atlas.ts";
 
 interface HelloArguments {
   deploymentName: string;
@@ -14,15 +14,17 @@ interface HelloResult {
   errorCode?: string;
 }
 
-async function getConnectionString(deploymentName: string): Promise<string> {
-  const connectionString = await invokeAtlasCli([
+async function getConnectionString(
+  deploymentName: string,
+): Promise<false | string> {
+  const result: AtlasCliInvocationResult = await invokeAtlasCli([
     "deployments",
     "connect",
     deploymentName,
     "--connectWith",
     "connectionString",
   ]);
-  return connectionString.trim();
+  return result.ok ? result.output.trim() : false;
 }
 
 async function hello(connectionString: string): Promise<HelloResult> {
@@ -49,6 +51,14 @@ async function hello(connectionString: string): Promise<HelloResult> {
 async function handler(argv: HelloArguments) {
   const deploymentName = argv.deploymentName;
   const connectionString = await getConnectionString(deploymentName);
+
+  if (!connectionString) {
+    console.error(
+      `%cCould not get connection string for deployment "${deploymentName}".`,
+      "color: red",
+    );
+    return;
+  }
   console.log(
     `%cConnection string: %c${connectionString}`,
     "font-weight: bold",

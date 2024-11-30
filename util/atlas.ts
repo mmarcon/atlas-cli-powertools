@@ -28,9 +28,13 @@ export async function getAtlasCliExecutable(ppid: number): Promise<string> {
   return "atlas";
 }
 
+export type AtlasCliInvocationResult =
+  | { ok: true; output: string }
+  | { ok: false; errorCode: number };
+
 export async function invokeAtlasCli(
   args: string[],
-): Promise<string> {
+): Promise<AtlasCliInvocationResult> {
   const atlasCliExecutable = await getAtlasCliExecutable(Deno.ppid);
   const process = new Deno.Command(atlasCliExecutable, {
     args: args,
@@ -42,8 +46,9 @@ export async function invokeAtlasCli(
   const { code, stdout } = await process.output();
 
   if (code !== 0) {
-    throw new Error(`Atlas CLI exited with code ${code}`);
+    return { ok: false, errorCode: code };
   }
+
   const output = new TextDecoder().decode(stdout).trim();
-  return output;
+  return { ok: true, output };
 }
