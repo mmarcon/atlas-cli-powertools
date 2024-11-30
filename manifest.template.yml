@@ -1,0 +1,10 @@
+name: atlas-cli-powertools
+description: Powertools for the MongoDB Atlas CLI
+version: $VERSION
+github:
+    owner: $GITHUB_REPOSITORY_OWNER
+    name: $GITHUB_REPOSITORY_NAME
+binary: binary
+commands: 
+    powertools: 
+        description: Powertools for the MongoDB Atlas CLI
