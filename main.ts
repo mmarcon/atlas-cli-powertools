@@ -1,8 +1,14 @@
-export function add(a: number, b: number): number {
-  return a + b;
+import yargs from "https://deno.land/x/yargs/deno.ts";
+import hello from "./commands/hello.ts";
+
+function registerCommands() {
+  yargs(Deno.args.slice(1))
+    .scriptName("atlas powertools")
+    .command(hello)
+    .help()
+    .parse();
 }
 
-// Learn more at https://docs.deno.com/runtime/manual/examples/module_metadata#concepts
 if (import.meta.main) {
-  console.log("Powertools", "Add 2 + 3 =", add(2, 3));
+  registerCommands();
 }
