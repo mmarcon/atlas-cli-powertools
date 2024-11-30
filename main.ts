@@ -1,4 +1,4 @@
-import yargs from "https://deno.land/x/yargs/deno.ts";
+import yargs from "https://deno.land/x/yargs@v17.7.2-deno/deno.ts";;
 import hello from "./commands/hello.ts";
 
 function registerCommands() {

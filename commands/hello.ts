@@ -1,5 +1,5 @@
-import { Arguments } from 'https://deno.land/x/yargs/deno-types.ts';
-import { MongoClient, Document } from "npm:mongodb@6";
+import { Arguments } from "https://deno.land/x/yargs@v17.7.2-deno/deno-types.ts";
+import { MongoClient } from "npm:mongodb@6";
 import { invokeAtlasCli } from "../util/atlas.ts";
 
 interface HelloResponse {
