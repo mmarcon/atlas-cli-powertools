@@ -1,0 +1,71 @@
+name: Release Plugin
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Add Version as environment variable
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "GITHUB_REPOSITORY_NAME=${{ github.event.repository.name }}" >> $GITHUB_ENV
+    
+      - name: Add version to manifest file
+        run: |
+          # Change $VERSION in the manifest.yml to the version of the release
+          envsubst < manifest.template.yml > manifest_temp.yml && mv manifest_temp.yml manifest.yml
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Build
+        run: |
+          echo "$TARGETS" | while read target; do
+            mkdir -p "target/$target"
+            deno compile --allow-run --allow-env --allow-read --allow-sys --allow-net --target "$target" -o "target/$target/binary" main.ts
+            cp manifest.yml "target/$target/manifest.yml"
+            tar -czf "dist/$target.tar.gz" -C "target/$target" .
+          done
+        env:
+          TARGETS: |
+            x86_64-unknown-linux-gnu
+            aarch64-unknown-linux-gnu
+            x86_64-apple-darwin
+            aarch64-apple-darwin
+            x86_64-pc-windows-msvc
+      
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: plugin-artifacts-${{ github.ref_name }}
+          path: dist/
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: plugin-artifacts-${{ github.ref_name }}
+          path: dist/
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "dist/*"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
