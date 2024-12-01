@@ -37,7 +37,7 @@ jobs:
         run: |
           TARGETS=(
             "x86_64-unknown-linux-gnu|${BASENAME}_linux_amd64"
-            "aarch64-unknown-linux-gnu||${BASENAME}_linux_arm64"
+            "aarch64-unknown-linux-gnu|${BASENAME}_linux_arm64"
             "x86_64-apple-darwin|${BASENAME}_darwin_amd64"
             "aarch64-apple-darwin|${BASENAME}_darwin_arm64"
             "x86_64-pc-windows-msvc|${BASENAME}_windows_amd64"
