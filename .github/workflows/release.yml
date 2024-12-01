@@ -32,15 +32,18 @@ jobs:
           deno-version: v2.x
 
       - name: Build
+        env:
+          BASENAME: "${{ github.event.repository.name }}_${{ github.ref_name }}"
         run: |
           TARGETS=(
-            "x86_64-unknown-linux-gnu|${{ github.event.repository.name }}_${{ github.ref_name }}_linux_amd64"
-            "aarch64-unknown-linux-gnu||${{ github.event.repository.name }}_${{ github.ref_name }}_linux_arm64"
-            "x86_64-apple-darwin|${{ github.event.repository.name }}_${{ github.ref_name }}_darwin_amd64"
-            "aarch64-apple-darwin|${{ github.event.repository.name }}_${{ github.ref_name }}_darwin_arm64"
-            "x86_64-pc-windows-msvc|${{ github.event.repository.name }}_${{ github.ref_name }}_windows_amd64"
+            "x86_64-unknown-linux-gnu|${BASENAME}_linux_amd64"
+            "aarch64-unknown-linux-gnu||${BASENAME}_linux_arm64"
+            "x86_64-apple-darwin|${BASENAME}_darwin_amd64"
+            "aarch64-apple-darwin|${BASENAME}_darwin_arm64"
+            "x86_64-pc-windows-msvc|${BASENAME}_windows_amd64"
           )  
           mkdir -p "dist"
+          touch "dist/${BASENAME}_checksums.txt"
           for entry in "${TARGETS[@]}"; do
             target=${entry%%|*}
             artifact_name=${entry#*|}
@@ -48,6 +51,8 @@ jobs:
             deno compile --allow-run --allow-env --allow-read --allow-sys --allow-net --target "$target" -o "target/$artifact_name/binary" main.ts
             cp manifest.yml "target/$artifact_name/manifest.yml"
             tar -czf "dist/$artifact_name.tar.gz" -C "target/$artifact_name" .
+            CHECKSUM=$(shasum -a 256 dist/$artifact_name.tar.gz | awk '{print $1}')
+            echo "$CHECKSUM $artifact_name.tar.gz" >> "dist/${BASENAME}_checksums.txt"
           done
         shell: bash
 
