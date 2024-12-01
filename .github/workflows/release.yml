@@ -33,6 +33,7 @@ jobs:
 
       - name: Build
         run: |
+          sudo apt-get install -y unzip
           echo "$TARGETS" | while read target; do
             mkdir -p "target/$target"
             deno compile --allow-run --allow-env --allow-read --allow-sys --allow-net --target "$target" -o "target/$target/binary" main.ts
