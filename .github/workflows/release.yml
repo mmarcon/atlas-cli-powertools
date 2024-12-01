@@ -32,9 +32,8 @@ jobs:
           deno-version: v2.x
 
       - name: Build
-        env:
-          BASENAME: "${{ github.event.repository.name }}_${{ github.ref_name }}"
         run: |
+          BASENAME="${GITHUB_REPOSITORY_NAME}_${VERSION}"
           TARGETS=(
             "x86_64-unknown-linux-gnu|${BASENAME}_linux_amd64"
             "aarch64-unknown-linux-gnu|${BASENAME}_linux_arm64"
