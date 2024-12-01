@@ -33,20 +33,22 @@ jobs:
 
       - name: Build
         run: |
-          echo "$TARGETS" | while read target; do
+          TARGETS=(
+            "x86_64-unknown-linux-gnu"
+            "aarch64-unknown-linux-gnu"
+            "x86_64-apple-darwin"
+            "aarch64-apple-darwin"
+            "x86_64-pc-windows-msvc"
+          )  
+          mkdir -p "dist"
+          for target in "${TARGETS[@]}"; do
             mkdir -p "target/$target"
-            mkdir -p "dist"
             deno compile --allow-run --allow-env --allow-read --allow-sys --allow-net --target "$target" -o "target/$target/binary" main.ts
             cp manifest.yml "target/$target/manifest.yml"
             tar -czf "dist/$target.tar.gz" -C "target/$target" .
           done
-        env:
-          TARGETS: |
-            x86_64-unknown-linux-gnu
-            aarch64-unknown-linux-gnu
-            x86_64-apple-darwin
-            aarch64-apple-darwin
-            x86_64-pc-windows-msvc
+        shell: bash
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
