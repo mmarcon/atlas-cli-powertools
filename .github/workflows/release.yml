@@ -52,6 +52,8 @@ jobs:
             tar -czf "dist/$artifact_name.tar.gz" -C "target/$artifact_name" .
             CHECKSUM=$(shasum -a 256 dist/$artifact_name.tar.gz | awk '{print $1}')
             echo "$CHECKSUM $artifact_name.tar.gz" >> "dist/${BASENAME}_checksums.txt"
+            MIME=$(file -b "dist/$artifact_name.tar.gz")
+            echo "File type: $MIME"
           done
         shell: bash
 
