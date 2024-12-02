@@ -43,7 +43,7 @@ jobs:
             artifact_name=${entry#*|}
             mkdir -p "target/$artifact_name"
             deno compile --allow-run --allow-env --allow-read --allow-sys --allow-net --target "$target" -o "target/$artifact_name/binary" main.ts
-            $BINARY=$(basename $(ls target/$artifact_name/binary*)) envsubst < manifest.template.yml > "target/$artifact_name/manifest.yml"
+            $BINARY=$(basename $(ls target/"$artifact_name"/binary*)) envsubst < manifest.template.yml > "target/$artifact_name/manifest.yml"
             tar -czf "dist/$artifact_name.tar.gz" -C "target/$artifact_name" .
             CHECKSUM=$(shasum -a 256 dist/$artifact_name.tar.gz | awk '{print $1}')
             echo "$CHECKSUM $artifact_name.tar.gz" >> "dist/${BASENAME}_checksums.txt"
