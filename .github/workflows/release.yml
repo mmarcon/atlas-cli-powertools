@@ -20,11 +20,6 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "GITHUB_REPOSITORY_NAME=${{ github.event.repository.name }}" >> $GITHUB_ENV
-    
-      - name: Add version to manifest file
-        run: |
-          # Change $VERSION in the manifest.yml to the version of the release
-          envsubst < manifest.template.yml > manifest_temp.yml && mv manifest_temp.yml manifest.yml
 
       - name: Set up Deno
         uses: denoland/setup-deno@v2
@@ -48,7 +43,7 @@ jobs:
             artifact_name=${entry#*|}
             mkdir -p "target/$artifact_name"
             deno compile --allow-run --allow-env --allow-read --allow-sys --allow-net --target "$target" -o "target/$artifact_name/binary" main.ts
-            cp manifest.yml "target/$artifact_name/manifest.yml"
+            $BINARY=$(basename $(ls target/$artifact_name/binary*)) envsubst < manifest.template.yml > "target/$artifact_name/manifest.yml"
             tar -czf "dist/$artifact_name.tar.gz" -C "target/$artifact_name" .
             CHECKSUM=$(shasum -a 256 dist/$artifact_name.tar.gz | awk '{print $1}')
             echo "$CHECKSUM $artifact_name.tar.gz" >> "dist/${BASENAME}_checksums.txt"
