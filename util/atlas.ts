@@ -1,31 +1,26 @@
+import findProcess from "npm:find-process@1.4.7";
+
+interface ProcessInfo {
+  pid: number;
+  ppid?: number;
+  uid?: number;
+  gid?: number;
+  name: string;
+  bin: string;
+  cmd: string;
+}
+
 export async function getAtlasCliExecutable(ppid: number): Promise<string> {
-  //TODO: adjust things so that it returns the full path to the Atlas CLI executable. Right now it returns the name of the executable.
-
-  const cmdAndArgs: string[] = (
-    Deno.build.os === "windows"
-      ? `wmic process where (ProcessId=${ppid}) get ExecutablePath`
-      : `ps -p ${ppid} -o comm=`
-  ).split(" ");
-
-  const command = cmdAndArgs.shift();
-
-  if (!command) {
-    throw new Error("Command is undefined.");
+  try {
+    const processesForPid: ProcessInfo[] = await findProcess("pid", ppid) as ProcessInfo[];
+    if (processesForPid.length === 0) {
+      return "atlas";
+    }
+    const { bin } = processesForPid[0];
+    return bin;
+  } catch {
+    return "atlas";
   }
-  const process = new Deno.Command(command, {
-    args: cmdAndArgs,
-    env: Deno.env.toObject(),
-    stdout: "piped",
-    stderr: "piped",
-  }).spawn();
-
-  const { code, stdout } = await process.output();
-
-  if (code === 0) {
-    const output = new TextDecoder().decode(stdout).trim();
-    return output;
-  }
-  return "atlas";
 }
 
 export type AtlasCliInvocationResult =

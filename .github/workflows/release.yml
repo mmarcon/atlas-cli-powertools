@@ -35,7 +35,7 @@ jobs:
             "x86_64-apple-darwin|${BASENAME}_darwin_amd64"
             "aarch64-apple-darwin|${BASENAME}_darwin_arm64"
             "x86_64-pc-windows-msvc|${BASENAME}_windows_amd64"
-          )  
+          )
           mkdir -p "dist"
           touch "dist/${BASENAME}_checksums.txt"
           for entry in "${TARGETS[@]}"; do

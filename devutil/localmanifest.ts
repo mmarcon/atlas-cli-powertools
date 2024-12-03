@@ -31,6 +31,7 @@ function injectLocalConfig(config: LocalConfig): LocalConfig {
   config.version = "0.0.1-dev";
   config.github.owner = "mmarcon";
   config.github.name = "atlas-cli-powertools";
+  config.binary = "binary";
   return config;
 }
 
